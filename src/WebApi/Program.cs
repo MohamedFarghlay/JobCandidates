@@ -1,15 +1,36 @@
+using Infrastructure;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddInfrastructure(builder.Configuration);
+
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Apply migrations
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    try
+    {
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        // Log or handle the exception as needed
+        Console.WriteLine($"An error occurred while applying migrations: {ex.Message}");
+        throw; // You can choose to rethrow the exception or handle it gracefully
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
