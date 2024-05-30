@@ -14,5 +14,6 @@ public static class ServiceCollectionExtensions
                options.UseSqlServer(configration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IJobCandidateRepository, JobCandidateRepository>();
+        services.Decorate<IJobCandidateRepository, CachedJobCandidateRepository>();
     }
 }
